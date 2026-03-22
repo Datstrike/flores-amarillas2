@@ -6,16 +6,116 @@
     <title>Para Hazel</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; background-color: #f6f1e3; font-family: 'Quicksand', sans-serif; color: #4a3320; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; position: relative; }
-        .btn-music { position: absolute; top: 20px; right: 20px; background-color: #2b2b2b; color: #ffca28; border: 2px solid #ffca28; padding: 6px 16px; border-radius: 20px; font-family: 'Quicksand', sans-serif; font-weight: bold; font-size: 14px; cursor: pointer; z-index: 100; }
-        .container { display: flex; flex: 1; width: 100%; max-width: 1100px; margin: 0 auto; align-items: center; justify-content: center; padding-bottom: 40px; }
-        .text-section { flex: 1; padding: 20px 60px; font-size: 20px; line-height: 1.8; max-width: 500px; }
-        .tree-section { flex: 1; position: relative; height: 550px; display: flex; align-items: flex-end; justify-content: center; }
-        #cursor { color: #ffca28; font-weight: bold; animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        canvas { position: absolute; bottom: 0; }
-        .bottom-line { position: absolute; bottom: 30px; left: 10%; width: 80%; height: 3px; background-color: #4a3320; border-radius: 2px; }
-        @media (max-width: 768px) { .container { flex-direction: column; justify-content: flex-start; padding-top: 60px; } .text-section { font-size: 16px; padding: 20px 30px; margin-top: 20px; } .tree-section { height: 350px; } }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f6f1e3; /* Color crema */
+            font-family: 'Quicksand', sans-serif;
+            color: #4a3320; /* Texto café */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Botón de música arriba a la derecha */
+        .btn-music {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #2b2b2b;
+            color: #ffca28;
+            border: 2px solid #ffca28;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* Contenedor principal de dos columnas */
+        .container {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 40px;
+        }
+
+        /* Sección Izquierda: Texto */
+        .text-section {
+            flex: 1;
+            padding: 20px 60px;
+            font-size: 20px;
+            line-height: 1.8;
+            max-width: 500px;
+            z-index: 10;
+        }
+
+        /* Sección Derecha: Árbol */
+        .tree-section {
+            flex: 1;
+            position: relative;
+            height: 550px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center; /* Centrar árbol horizontalmente */
+            padding-right: 60px; /* Equilibrio visual con el texto */
+        }
+
+        #cursor {
+            color: #ffca28;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        canvas {
+            position: absolute;
+            bottom: 0;
+            left: 50%; /* Alinear lienzo al centro */
+            transform: translateX(-50%); /* Centrar lienzo perfectamente */
+        }
+
+        /* Línea horizontal inferior */
+        .bottom-line {
+            position: absolute;
+            bottom: 30px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background-color: #4a3320;
+            border-radius: 2px;
+        }
+
+        /* Adaptación para celulares */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 60px;
+            }
+            .text-section {
+                font-size: 16px;
+                padding: 20px 30px;
+                margin-top: 20px;
+                text-align: center;
+            }
+            .tree-section {
+                height: 350px;
+                padding-right: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -36,6 +136,7 @@
     <audio id="bgMusic" src="Mitski.mp3" loop></audio>
 
     <script>
+        // 1. EL TEXTO A ESCRIBIR
         const fullText = "Hola, Técnicamente si cuentan como flores ¿No?\n\nLas primeras que doy:\n\nA alguien que odio pero sigo amando,\npasa lindo día Hazel.\n\n— Te Aprecio mucho!";
         const textEl = document.getElementById('text');
         let idx = 0;
@@ -45,12 +146,13 @@
                 let char = fullText.charAt(idx);
                 textEl.innerHTML += (char === '\n') ? '<br>' : char;
                 idx++;
-                setTimeout(typeText, 45);
+                setTimeout(typeText, 45); // Velocidad de escritura
             } else {
-                startAnimation();
+                startAnimation(); // Cuando termina el texto, crece el árbol
             }
         }
 
+        // 2. EL LIENZO DEL ÁRBOL
         const canvas = document.getElementById('treeCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = 450;
@@ -58,12 +160,14 @@
 
         const maxTrunkHeight = 160;
         let trunkHeight = 0;
-        let branchesDrawn = false;
         let flowers = [];
-        let totalFlowers = 1800; // MUCHAS flores
-        const cx = 225;
-        const cy = 210;
+        let totalFlowers = 1800; // MUCHAS flores pequeñas
+        
+        // Coordenadas del lienzo centrado
+        const cx = canvas.width / 2; // Centro horizontal exacto del canvas (225)
+        const cy = 200; // Centro Y del corazón (bajado un poco)
 
+        // Función para dibujar una sola florecita
         function drawFlower(x, y, size, opacity) {
             ctx.fillStyle = `rgba(251, 188, 4, ${opacity})`;
             for (let i = 0; i < 8; i++) {
@@ -77,70 +181,92 @@
             ctx.fill();
         }
 
+        // Función para dibujar el tronco base y las ramas estáticas
         function drawTrunkAndBranches(height) {
             ctx.fillStyle = '#4a2f1d';
             ctx.beginPath();
-            ctx.moveTo(210, 500);
-            ctx.lineTo(240, 500);
-            ctx.lineTo(232, 500 - height);
-            ctx.lineTo(218, 500 - height);
+            // Base del tronco centrada matemáticamente
+            ctx.moveTo(cx - 15, 500); // 210
+            ctx.lineTo(cx + 15, 500); // 240
+            // Copa del tronco centrada
+            ctx.lineTo(cx + 7, 500 - height); // 232
+            ctx.lineTo(cx - 7, 500 - height); // 218
             ctx.fill();
 
+            // Dibujar ramas solo cuando el tronco ha crecido
             if (height >= maxTrunkHeight) {
                 ctx.strokeStyle = '#4a2f1d';
                 ctx.lineCap = 'round';
+                const yBranches = 500 - maxTrunkHeight; // 340, punto base de las ramas
+
+                // Rama izquierda centrada
                 ctx.lineWidth = 8;
-                ctx.beginPath(); ctx.moveTo(225, 350); ctx.lineTo(170, 280); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(225, 350); ctx.lineTo(280, 270); ctx.stroke();
+                ctx.beginPath(); 
+                ctx.moveTo(cx, yBranches + 10); // 225, 350
+                ctx.lineTo(cx - 55, yBranches - 60); // 170, 280
+                ctx.stroke();
+
+                // Rama derecha centrada
+                ctx.beginPath(); 
+                ctx.moveTo(cx, yBranches + 10); // 225, 350
+                ctx.lineTo(cx + 55, yBranches - 70); // 280, 270
+                ctx.stroke();
+
+                // Sub-ramas centradas
                 ctx.lineWidth = 5;
-                ctx.beginPath(); ctx.moveTo(195, 310); ctx.lineTo(150, 315); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(255, 310); ctx.lineTo(310, 305); ctx.stroke();
+                ctx.beginPath(); 
+                ctx.moveTo(cx - 30, yBranches - 30); // 195, 310
+                ctx.lineTo(cx - 75, yBranches - 25); // 150, 315
+                ctx.stroke();
+
+                ctx.beginPath(); 
+                ctx.moveTo(cx + 30, yBranches - 30); // 255, 310
+                ctx.lineTo(cx + 85, yBranches - 35); // 310, 305
+                ctx.stroke();
             }
         }
 
+        // Generar las coordenadas para el corazón denso y ajustado
         function generateHeartCoords(num) {
             let coords = [];
             for (let i = 0; i < num; i++) {
                 const t = Math.random() * Math.PI * 2;
-                const r = Math.sqrt(Math.random()) * 0.95; 
+                // Raíz cuadrada y factor 0.9 para rellenar uniformemente por dentro
+                const r = Math.sqrt(Math.random()) * 0.9; 
+
+                // Ecuación paramétrica de un corazón
                 const heartX = 16 * Math.pow(Math.sin(t), 3);
                 const heartY = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+                // Escala reducida (8) para un corazón más denso
                 coords.push({
-                    targetX: cx + heartX * 8.5 * r,
-                    targetY: cy + heartY * 8.5 * r
+                    targetX: cx + heartX * 8 * r, 
+                    targetY: cy + heartY * 8 * r
                 });
             }
             return coords;
         }
 
+        // Inicializar todas las flores
         function initFlowers() {
             let heartCoords = generateHeartCoords(totalFlowers);
             for (let f of heartCoords) {
                 flowers.push({
-                    state: 'fall', // 'fall' o 'heart' o 'float'
-                    x: cx + (Math.random() - 0.5) * 150,
+                    state: 'fall',
+                    x: cx + (Math.random() - 0.5) * 150, // Nacer arriba centradas
                     y: cy - 150 - Math.random() * 100,
                     targetX: f.targetX,
                     targetY: f.targetY,
-                    size: Math.random() * 5 + 2,
+                    size: Math.random() * 5 + 2, // Tamaños variados
                     fallSpeed: Math.random() * 2 + 1,
                     wobblePhase: Math.random() * Math.PI * 2,
                     opacity: 0
                 });
             }
-            // Flores flotando por debajo
-            for(let i=0; i<60; i++){
-                flowers.push({
-                    state: 'float',
-                    x: cx + (Math.random() - 0.5) * 300,
-                    y: cy + 180 + Math.random() * 150,
-                    size: Math.random() * 3 + 1,
-                    wobblePhase: Math.random() * Math.PI * 2,
-                    opacity: Math.random() * 0.5 + 0.3
-                });
-            }
+            // === ELIMINADO: Bucle de flores sueltas flotando ===
         }
 
+        // Iniciar la animación
         function startAnimation() {
             initFlowers();
             animate();
@@ -167,15 +293,12 @@
                         f.x += Math.sin(time * 0.05 + f.wobblePhase) * 0.3;
 
                         if (f.y >= f.targetY) {
-                            f.y = f.targetY; f.x = f.targetX;
+                            f.y = f.targetY; 
+                            f.x = f.targetX;
                             f.state = 'heart';
                         }
-                    } else if (f.state === 'float') {
-                        // Movimiento suave por debajo
-                        f.y += Math.sin(time * 0.02 + f.wobblePhase) * 0.1;
-                        f.x += Math.cos(time * 0.02 + f.wobblePhase) * 0.1;
                     }
-                    // En estado 'heart', la flor ya no se mueve
+                    // Dibujar flor con opacidad y tamaño
                     drawFlower(f.x, f.y, f.size, f.opacity);
                 }
             }
@@ -184,13 +307,21 @@
             requestAnimationFrame(animate);
         }
 
+        // Lógica del botón de música
         const btnMusic = document.getElementById('btnMusic');
         const bgMusic = document.getElementById('bgMusic');
         btnMusic.addEventListener('click', () => {
-            if (bgMusic.paused) { bgMusic.play(); } else { bgMusic.pause(); }
+            if (bgMusic.paused) {
+                bgMusic.play();
+            } else {
+                bgMusic.pause();
+            }
         });
 
-        window.onload = () => { setTimeout(typeText, 500); };
+        // Iniciar la animación medio segundo después de cargar
+        window.onload = () => {
+            setTimeout(typeText, 500);
+        };
     </script>
 </body>
 </html>
