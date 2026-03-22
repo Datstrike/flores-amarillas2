@@ -127,7 +127,7 @@
 
     <div class="bottom-line"></div>
 
-    <audio id="bgMusic" src="mitski.mp3" loop></audio>
+    <audio id="bgMusic" src="Mitski.mp3" loop></audio>
 
     <script>
         const fullText = "Hola, Técnicamente si cuentan como flores ¿No?\n\nLas primeras que doy:\n\nA alguien que odio pero sigo amando,\npasa lindo día Hazel.\n\n— Te Aprecio mucho!";
@@ -150,24 +150,22 @@
         canvas.width = 450;
         canvas.height = 500;
 
-        // Tronco más corto para que las ramas queden dentro del corazón
-        const maxTrunkHeight = 140; 
+        const maxTrunkHeight = 160;
         let trunkHeight = 0;
         let flowers = [];
         const totalHeartFlowers = 1800; 
         const totalGroundFlowers = 40; 
         
         const cx = canvas.width / 2; 
-        // Centro del corazón más bajo para cubrir las ramas
+        // Centro del corazón bajado para cubrir las ramas
         const cy = 230; 
 
         // Función rediseñada para permitir rotación sobre su propio eje
         function drawFlower(x, y, size, opacity, rotation) {
-            ctx.save(); // Guarda el estado del lienzo
-            ctx.translate(x, y); // Mueve el punto de origen al centro de la flor
-            ctx.rotate(rotation); // Rota el lienzo
+            ctx.save(); 
+            ctx.translate(x, y); 
+            ctx.rotate(rotation); 
 
-            // Dibuja la flor centrada en el nuevo origen (0,0)
             ctx.fillStyle = `rgba(251, 188, 4, ${opacity})`;
             for (let i = 0; i < 8; i++) {
                 ctx.beginPath();
@@ -179,7 +177,7 @@
             ctx.arc(0, 0, size / 2.5, 0, 2 * Math.PI);
             ctx.fill();
 
-            ctx.restore(); // Restaura el lienzo a su estado original
+            ctx.restore(); 
         }
 
         function drawTrunkAndBranches(height) {
@@ -194,9 +192,9 @@
             if (height >= maxTrunkHeight) {
                 ctx.strokeStyle = '#4a2f1d';
                 ctx.lineCap = 'round';
-                const yBranches = 500 - maxTrunkHeight; // Base de ramas en Y=360
+                const yBranches = 500 - maxTrunkHeight; // Base de ramas en Y=340
 
-                // Ramas más cortas y contenidas
+                // Ramas más cortas y contenidas para quedar dentro
                 ctx.lineWidth = 8;
                 ctx.beginPath(); ctx.moveTo(cx, yBranches + 10); ctx.lineTo(cx - 45, yBranches - 50); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(cx, yBranches + 10); ctx.lineTo(cx + 45, yBranches - 40); ctx.stroke();
@@ -292,6 +290,7 @@
                         f.rotation += f.rotationSpeed; // Siempre giran
                     }
 
+                    // Se dibuja cada flor con su ángulo actual
                     drawFlower(f.x, f.y, f.size, f.opacity, f.rotation);
                 }
             }
