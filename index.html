@@ -154,13 +154,12 @@
         let trunkHeight = 0;
         let flowers = [];
         const totalHeartFlowers = 1800; 
-        const totalGroundFlowers = 40; 
+        const totalGroundFlowers = 45; 
         
         const cx = canvas.width / 2; 
-        // Centro del corazón bajado para cubrir las ramas
-        const cy = 230; 
+        // 1. EL CORAZÓN AHORA ESTÁ MÁS ABAJO PARA CUBRIR LAS RAMAS
+        const cy = 265; 
 
-        // Función rediseñada para permitir rotación sobre su propio eje
         function drawFlower(x, y, size, opacity, rotation) {
             ctx.save(); 
             ctx.translate(x, y); 
@@ -192,9 +191,8 @@
             if (height >= maxTrunkHeight) {
                 ctx.strokeStyle = '#4a2f1d';
                 ctx.lineCap = 'round';
-                const yBranches = 500 - maxTrunkHeight; // Base de ramas en Y=340
+                const yBranches = 500 - maxTrunkHeight;
 
-                // Ramas más cortas y contenidas para quedar dentro
                 ctx.lineWidth = 8;
                 ctx.beginPath(); ctx.moveTo(cx, yBranches + 10); ctx.lineTo(cx - 45, yBranches - 50); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(cx, yBranches + 10); ctx.lineTo(cx + 45, yBranches - 40); ctx.stroke();
@@ -222,7 +220,6 @@
         }
 
         function initFlowers() {
-            // 1. Flores del Corazón (caen desde arriba)
             let heartCoords = generateHeartCoords(totalHeartFlowers);
             for (let f of heartCoords) {
                 flowers.push({
@@ -235,21 +232,21 @@
                     size: Math.random() * 5 + 2, 
                     fallSpeed: Math.random() * 2 + 1,
                     wobblePhase: Math.random() * Math.PI * 2,
-                    rotation: Math.random() * Math.PI * 2, // Rotación inicial
-                    rotationSpeed: (Math.random() - 0.5) * 0.1, // Velocidad de giro al caer
+                    rotation: Math.random() * Math.PI * 2, 
+                    rotationSpeed: (Math.random() - 0.5) * 0.1, 
                     opacity: 0
                 });
             }
 
-            // 2. Flores del Suelo (estáticas pero girando)
             for (let i = 0; i < totalGroundFlowers; i++) {
                 flowers.push({
                     type: 'ground',
-                    x: cx + (Math.random() - 0.5) * 220, // Dispersas en el suelo
-                    y: 460 + Math.random() * 35, // Altura del suelo
+                    x: cx + (Math.random() - 0.5) * 220, 
+                    y: 460 + Math.random() * 35, 
                     size: Math.random() * 4 + 2.5,
                     rotation: Math.random() * Math.PI * 2,
-                    rotationSpeed: (Math.random() - 0.5) * 0.04, // Giro constante y suave
+                    // 2. GIRO ESTRICTAMENTE POSITIVO (SENTIDO RELOJ)
+                    rotationSpeed: Math.random() * 0.03 + 0.015, 
                     opacity: 0
                 });
             }
@@ -277,7 +274,7 @@
                             f.opacity = Math.min(1, f.opacity + 0.05); 
                             f.y += f.fallSpeed;
                             f.x += Math.sin(time * 0.05 + f.wobblePhase) * 0.3;
-                            f.rotation += f.rotationSpeed; // Gira mientras cae
+                            f.rotation += f.rotationSpeed; 
 
                             if (f.y >= f.targetY) {
                                 f.y = f.targetY; 
@@ -286,11 +283,10 @@
                             }
                         }
                     } else if (f.type === 'ground') {
-                        f.opacity = Math.min(1, f.opacity + 0.02); // Aparecen gradualmente
-                        f.rotation += f.rotationSpeed; // Siempre giran
+                        f.opacity = Math.min(1, f.opacity + 0.02); 
+                        f.rotation += f.rotationSpeed; // Giran solo hacia la derecha
                     }
 
-                    // Se dibuja cada flor con su ángulo actual
                     drawFlower(f.x, f.y, f.size, f.opacity, f.rotation);
                 }
             }
