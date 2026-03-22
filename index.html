@@ -224,60 +224,121 @@
             ctx.fill();
         }
 
-        // Generar la lluvia de flores formando el corazón
+        // === NUEVO SISTEMA DE PARTÍCULAS ANIMADO ===
         function spawnFlowers() {
-            const flowers = [];
-            const totalFlowers = 400; // MUCHAS flores pequeñas
+            const fallingFlowers = [];
+            const totalFlowers = 1500; // CANTIDAD MASIVA DE FLORES
             
             const cx = 225; // Centro X
             const cy = 210; // Centro Y del corazón
 
+            // Crear las partículas
             for (let i = 0; i < totalFlowers; i++) {
+                // Posición final en el corazón (matemáticas paramétricas)
                 const t = Math.random() * Math.PI * 2;
-                // Raíz cuadrada para rellenar uniformemente el centro
                 const r = Math.sqrt(Math.random()) * 0.95; 
 
-                // Ecuación paramétrica de un corazón
-                const x = 16 * Math.pow(Math.sin(t), 3);
-                const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+                const heartX = 16 * Math.pow(Math.sin(t), 3);
+                const heartY = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
 
                 const scale = 8.5 * r;
-                const finalX = cx + x * scale;
-                const finalY = cy + y * scale;
+                
+                fallingFlowers.push({
+                    // Posición inicial (arriba, fuera de la copa)
+                    x: cx + (Math.random() - 0.5) * 150,
+                    y: cy - 150 - Math.random() * 100,
+                    // Posición final (en el corazón)
+                    targetX: cx + heartX * scale,
+                    targetY: cy + heartY * scale,
+                    // Tamaño aleatorio para variar (2px a 7px)
+                    size: Math.random() * 5 + 2,
+                    fallSpeed: Math.random() * 2 + 1, // Velocidad de caída
+                    wobbleSpeed: Math.random() * 0.05, // Velocidad de balanceo
+                    wobbleAmount: Math.random() * 5, // Cantidad de balanceo
+                    wobblePhase: Math.random() * Math.PI * 2, // Fase del balanceo
+                    arrived: false, // Flag para saber si ya llegó a su lugar
+                    
+                    // Función para actualizar la posición de cada flor
+                    update: function(time) {
+                        if (!this.arrived) {
+                            // Caída vertical
+                            this.y += this.fallSpeed;
+                            
+                            // Balanceo horizontal
+                            this.x += Math.sin(time * this.wobbleSpeed + this.wobblePhase) * 0.5;
 
-                // Guardamos la flor para dibujarla con retraso
-                flowers.push({ x: finalX, y: finalY, size: Math.random() * 3 + 3, delay: i * 8 });
-            }
-
-            // Añadir flores sueltas cayendo por debajo
-            for (let i = 0; i < 20; i++) {
-                flowers.push({
-                    x: cx + (Math.random() - 0.5) * 200,
-                    y: cy + 180 + Math.random() * 80,
-                    size: Math.random() * 2 + 2,
-                    delay: totalFlowers * 8 + i * 50
+                            // Verificar si llegó o pasó su objetivo
+                            if (this.y >= this.targetY) {
+                                this.y = this.targetY;
+                                this.x = this.targetX;
+                                this.arrived = true;
+                            }
+                        }
+                    }
                 });
             }
 
-            let start = Date.now();
-            function renderFlowers() {
-                let now = Date.now();
-                let elapsed = now - start;
-                let pending = false;
-                
-                for (let f of flowers) {
-                    if (!f.drawn && elapsed > f.delay) {
-                        drawFlower(f.x, f.y, f.size);
-                        f.drawn = true;
+            // Crear las flores sueltas que caen por debajo
+            for (let i = 0; i < 50; i++) {
+                 fallingFlowers.push({
+                    x: cx + (Math.random() - 0.5) * 200,
+                    y: cy - 150 - Math.random() * 100,
+                    targetX: cx + (Math.random() - 0.5) * 200,
+                    targetY: cy + 180 + Math.random() * 120, // Caer por debajo del tronco
+                    size: Math.random() * 2 + 2,
+                    fallSpeed: Math.random() * 1.5 + 0.5,
+                    wobbleSpeed: Math.random() * 0.02,
+                    wobbleAmount: Math.random() * 2,
+                    wobblePhase: Math.random() * Math.PI * 2,
+                    arrived: false,
+                    
+                    update: function(time) {
+                         if (!this.arrived) {
+                            this.y += this.fallSpeed;
+                            this.x += Math.sin(time * this.wobbleSpeed + this.wobblePhase) * 0.3;
+
+                            if (this.y >= this.targetY) {
+                                this.y = this.targetY;
+                                this.arrived = true;
+                            }
+                        }
                     }
-                    if (!f.drawn) pending = true;
+                });
+            }
+
+            // Ciclo de animación principal
+            function animateFlowers() {
+                // Borrar canvas para redibujar
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Primero redibujamos el tronco y ramas (ya que borramos todo)
+                // Dibuja el tronco base estático
+                ctx.fillStyle = '#4a2f1d';
+                ctx.beginPath();
+                ctx.moveTo(210, 500); 
+                ctx.lineTo(240, 500); 
+                ctx.lineTo(232, 500 - maxTrunkHeight);
+                ctx.lineTo(218, 500 - maxTrunkHeight);
+                ctx.fill();
+                
+                drawBranches(); // Redibujar las ramas
+                
+                let time = Date.now();
+                let allArrived = true;
+
+                // Actualizar y dibujar cada flor
+                for (let f of fallingFlowers) {
+                    f.update(time);
+                    drawFlower(f.x, f.y, f.size);
+                    if (!f.arrived) allArrived = false;
                 }
 
-                if (pending) {
-                    requestAnimationFrame(renderFlowers);
+                // Continuar la animación si hay flores cayendo
+                if (!allArrived) {
+                    requestAnimationFrame(animateFlowers);
                 }
             }
-            renderFlowers();
+            animateFlowers(); // Iniciar la animación
         }
 
         // Lógica del botón de música
