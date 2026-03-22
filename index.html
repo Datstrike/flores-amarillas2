@@ -9,9 +9,9 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #f6f1e3; /* Color crema */
+            background-color: #f6f1e3;
             font-family: 'Quicksand', sans-serif;
-            color: #4a3320; /* Texto café */
+            color: #4a3320;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -19,7 +19,6 @@
             position: relative;
         }
 
-        /* Botón de música arriba a la derecha */
         .btn-music {
             position: absolute;
             top: 20px;
@@ -36,7 +35,6 @@
             z-index: 100;
         }
 
-        /* Contenedor principal de dos columnas */
         .container {
             display: flex;
             flex: 1;
@@ -48,7 +46,6 @@
             padding-bottom: 40px;
         }
 
-        /* Sección Izquierda: Texto */
         .text-section {
             flex: 1;
             padding: 20px 60px;
@@ -58,15 +55,14 @@
             z-index: 10;
         }
 
-        /* Sección Derecha: Árbol */
         .tree-section {
             flex: 1;
             position: relative;
             height: 550px;
             display: flex;
             align-items: flex-end;
-            justify-content: center; /* Centrar árbol horizontalmente */
-            padding-right: 60px; /* Equilibrio visual con el texto */
+            justify-content: center;
+            padding-right: 60px;
         }
 
         #cursor {
@@ -83,11 +79,10 @@
         canvas {
             position: absolute;
             bottom: 0;
-            left: 50%; /* Alinear lienzo al centro */
-            transform: translateX(-50%); /* Centrar lienzo perfectamente */
+            left: 50%;
+            transform: translateX(-50%);
         }
 
-        /* Línea horizontal inferior */
         .bottom-line {
             position: absolute;
             bottom: 30px;
@@ -98,7 +93,6 @@
             border-radius: 2px;
         }
 
-        /* Adaptación para celulares */
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -133,10 +127,9 @@
 
     <div class="bottom-line"></div>
 
-    <audio id="bgMusic" src="Mitski.mp3" loop></audio>
+    <audio id="bgMusic" src="mitski.mp3" loop></audio>
 
     <script>
-        // 1. EL TEXTO A ESCRIBIR
         const fullText = "Hola, Técnicamente si cuentan como flores ¿No?\n\nLas primeras que doy:\n\nA alguien que odio pero sigo amando,\npasa lindo día Hazel.\n\n— Te Aprecio mucho!";
         const textEl = document.getElementById('text');
         let idx = 0;
@@ -146,99 +139,82 @@
                 let char = fullText.charAt(idx);
                 textEl.innerHTML += (char === '\n') ? '<br>' : char;
                 idx++;
-                setTimeout(typeText, 45); // Velocidad de escritura
+                setTimeout(typeText, 45); 
             } else {
-                startAnimation(); // Cuando termina el texto, crece el árbol
+                startAnimation(); 
             }
         }
 
-        // 2. EL LIENZO DEL ÁRBOL
         const canvas = document.getElementById('treeCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = 450;
         canvas.height = 500;
 
-        const maxTrunkHeight = 160;
+        // Tronco más corto para que las ramas queden dentro del corazón
+        const maxTrunkHeight = 140; 
         let trunkHeight = 0;
         let flowers = [];
-        let totalFlowers = 1800; // MUCHAS flores pequeñas
+        const totalHeartFlowers = 1800; 
+        const totalGroundFlowers = 40; 
         
-        // Coordenadas del lienzo centrado
-        const cx = canvas.width / 2; // Centro horizontal exacto del canvas (225)
-        const cy = 200; // Centro Y del corazón (bajado un poco)
+        const cx = canvas.width / 2; 
+        // Centro del corazón más bajo para cubrir las ramas
+        const cy = 230; 
 
-        // Función para dibujar una sola florecita
-        function drawFlower(x, y, size, opacity) {
+        // Función rediseñada para permitir rotación sobre su propio eje
+        function drawFlower(x, y, size, opacity, rotation) {
+            ctx.save(); // Guarda el estado del lienzo
+            ctx.translate(x, y); // Mueve el punto de origen al centro de la flor
+            ctx.rotate(rotation); // Rota el lienzo
+
+            // Dibuja la flor centrada en el nuevo origen (0,0)
             ctx.fillStyle = `rgba(251, 188, 4, ${opacity})`;
             for (let i = 0; i < 8; i++) {
                 ctx.beginPath();
-                ctx.ellipse(x, y, size, size / 2.5, (i * Math.PI) / 4, 0, 2 * Math.PI);
+                ctx.ellipse(0, 0, size, size / 2.5, (i * Math.PI) / 4, 0, 2 * Math.PI);
                 ctx.fill();
             }
             ctx.fillStyle = `rgba(107, 74, 49, ${opacity})`;
             ctx.beginPath();
-            ctx.arc(x, y, size / 2.5, 0, 2 * Math.PI);
+            ctx.arc(0, 0, size / 2.5, 0, 2 * Math.PI);
             ctx.fill();
+
+            ctx.restore(); // Restaura el lienzo a su estado original
         }
 
-        // Función para dibujar el tronco base y las ramas estáticas
         function drawTrunkAndBranches(height) {
             ctx.fillStyle = '#4a2f1d';
             ctx.beginPath();
-            // Base del tronco centrada matemáticamente
-            ctx.moveTo(cx - 15, 500); // 210
-            ctx.lineTo(cx + 15, 500); // 240
-            // Copa del tronco centrada
-            ctx.lineTo(cx + 7, 500 - height); // 232
-            ctx.lineTo(cx - 7, 500 - height); // 218
+            ctx.moveTo(cx - 15, 500); 
+            ctx.lineTo(cx + 15, 500); 
+            ctx.lineTo(cx + 7, 500 - height); 
+            ctx.lineTo(cx - 7, 500 - height); 
             ctx.fill();
 
-            // Dibujar ramas solo cuando el tronco ha crecido
             if (height >= maxTrunkHeight) {
                 ctx.strokeStyle = '#4a2f1d';
                 ctx.lineCap = 'round';
-                const yBranches = 500 - maxTrunkHeight; // 340, punto base de las ramas
+                const yBranches = 500 - maxTrunkHeight; // Base de ramas en Y=360
 
-                // Rama izquierda centrada
+                // Ramas más cortas y contenidas
                 ctx.lineWidth = 8;
-                ctx.beginPath(); 
-                ctx.moveTo(cx, yBranches + 10); // 225, 350
-                ctx.lineTo(cx - 55, yBranches - 60); // 170, 280
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx, yBranches + 10); ctx.lineTo(cx - 45, yBranches - 50); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx, yBranches + 10); ctx.lineTo(cx + 45, yBranches - 40); ctx.stroke();
 
-                // Rama derecha centrada
-                ctx.beginPath(); 
-                ctx.moveTo(cx, yBranches + 10); // 225, 350
-                ctx.lineTo(cx + 55, yBranches - 70); // 280, 270
-                ctx.stroke();
-
-                // Sub-ramas centradas
                 ctx.lineWidth = 5;
-                ctx.beginPath(); 
-                ctx.moveTo(cx - 30, yBranches - 30); // 195, 310
-                ctx.lineTo(cx - 75, yBranches - 25); // 150, 315
-                ctx.stroke();
-
-                ctx.beginPath(); 
-                ctx.moveTo(cx + 30, yBranches - 30); // 255, 310
-                ctx.lineTo(cx + 85, yBranches - 35); // 310, 305
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx - 20, yBranches - 20); ctx.lineTo(cx - 60, yBranches - 15); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx + 20, yBranches - 20); ctx.lineTo(cx + 65, yBranches - 25); ctx.stroke();
             }
         }
 
-        // Generar las coordenadas para el corazón denso y ajustado
         function generateHeartCoords(num) {
             let coords = [];
             for (let i = 0; i < num; i++) {
                 const t = Math.random() * Math.PI * 2;
-                // Raíz cuadrada y factor 0.9 para rellenar uniformemente por dentro
                 const r = Math.sqrt(Math.random()) * 0.9; 
-
-                // Ecuación paramétrica de un corazón
                 const heartX = 16 * Math.pow(Math.sin(t), 3);
                 const heartY = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
 
-                // Escala reducida (8) para un corazón más denso
                 coords.push({
                     targetX: cx + heartX * 8 * r, 
                     targetY: cy + heartY * 8 * r
@@ -247,26 +223,40 @@
             return coords;
         }
 
-        // Inicializar todas las flores
         function initFlowers() {
-            let heartCoords = generateHeartCoords(totalFlowers);
+            // 1. Flores del Corazón (caen desde arriba)
+            let heartCoords = generateHeartCoords(totalHeartFlowers);
             for (let f of heartCoords) {
                 flowers.push({
+                    type: 'heart',
                     state: 'fall',
-                    x: cx + (Math.random() - 0.5) * 150, // Nacer arriba centradas
-                    y: cy - 150 - Math.random() * 100,
+                    x: cx + (Math.random() - 0.5) * 150, 
+                    y: cy - 200 - Math.random() * 100,
                     targetX: f.targetX,
                     targetY: f.targetY,
-                    size: Math.random() * 5 + 2, // Tamaños variados
+                    size: Math.random() * 5 + 2, 
                     fallSpeed: Math.random() * 2 + 1,
                     wobblePhase: Math.random() * Math.PI * 2,
+                    rotation: Math.random() * Math.PI * 2, // Rotación inicial
+                    rotationSpeed: (Math.random() - 0.5) * 0.1, // Velocidad de giro al caer
                     opacity: 0
                 });
             }
-            // === ELIMINADO: Bucle de flores sueltas flotando ===
+
+            // 2. Flores del Suelo (estáticas pero girando)
+            for (let i = 0; i < totalGroundFlowers; i++) {
+                flowers.push({
+                    type: 'ground',
+                    x: cx + (Math.random() - 0.5) * 220, // Dispersas en el suelo
+                    y: 460 + Math.random() * 35, // Altura del suelo
+                    size: Math.random() * 4 + 2.5,
+                    rotation: Math.random() * Math.PI * 2,
+                    rotationSpeed: (Math.random() - 0.5) * 0.04, // Giro constante y suave
+                    opacity: 0
+                });
+            }
         }
 
-        // Iniciar la animación
         function startAnimation() {
             initFlowers();
             animate();
@@ -277,37 +267,38 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             time++;
 
-            // 1. Dibujar tronco y ramas
             if (trunkHeight < maxTrunkHeight) {
                 trunkHeight += 3;
             }
             drawTrunkAndBranches(trunkHeight);
 
-            // 2. Dibujar y actualizar flores
             if (trunkHeight >= maxTrunkHeight) {
                 for (let f of flowers) {
-                    if (f.state === 'fall') {
-                        f.opacity = Math.min(1, f.opacity + 0.05); // Fundido de entrada
-                        f.y += f.fallSpeed;
-                        // Balanceo suave
-                        f.x += Math.sin(time * 0.05 + f.wobblePhase) * 0.3;
+                    if (f.type === 'heart') {
+                        if (f.state === 'fall') {
+                            f.opacity = Math.min(1, f.opacity + 0.05); 
+                            f.y += f.fallSpeed;
+                            f.x += Math.sin(time * 0.05 + f.wobblePhase) * 0.3;
+                            f.rotation += f.rotationSpeed; // Gira mientras cae
 
-                        if (f.y >= f.targetY) {
-                            f.y = f.targetY; 
-                            f.x = f.targetX;
-                            f.state = 'heart';
+                            if (f.y >= f.targetY) {
+                                f.y = f.targetY; 
+                                f.x = f.targetX;
+                                f.state = 'settled';
+                            }
                         }
+                    } else if (f.type === 'ground') {
+                        f.opacity = Math.min(1, f.opacity + 0.02); // Aparecen gradualmente
+                        f.rotation += f.rotationSpeed; // Siempre giran
                     }
-                    // Dibujar flor con opacidad y tamaño
-                    drawFlower(f.x, f.y, f.size, f.opacity);
+
+                    drawFlower(f.x, f.y, f.size, f.opacity, f.rotation);
                 }
             }
 
-            // Seguir la animación
             requestAnimationFrame(animate);
         }
 
-        // Lógica del botón de música
         const btnMusic = document.getElementById('btnMusic');
         const bgMusic = document.getElementById('bgMusic');
         btnMusic.addEventListener('click', () => {
@@ -318,7 +309,6 @@
             }
         });
 
-        // Iniciar la animación medio segundo después de cargar
         window.onload = () => {
             setTimeout(typeText, 500);
         };
