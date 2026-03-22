@@ -2,60 +2,185 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Para Elisa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flores Amarillas</title>
     <style>
-        body { background-color: #fdf6e3; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
-        #message { text-align: left; width: 80%; max-width: 400px; color: #5b4636; line-height: 1.6; z-index: 10; }
-        .flower { position: absolute; width: 12px; height: 12px; background: #ffd700; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.1); transform: scale(0); animation: grow 0.8s ease-out forwards; }
-        @keyframes grow { to { transform: scale(1); } }
-        #tree-container { position: relative; width: 300px; height: 300px; margin-top: 20px; }
-        .trunk { position: absolute; bottom: 0; left: 50%; width: 8px; height: 100px; background: #5b4636; transform: translateX(-50%); border-radius: 5px; }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #fdf6e3; /* Fondo color crema */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif; /* Tipografía limpia */
+            overflow: hidden;
+        }
+
+        #text-container {
+            margin-top: 15vh;
+            width: 85%;
+            max-width: 450px;
+            color: #2c2c2c;
+            font-size: 16px;
+            line-height: 1.6;
+            z-index: 10;
+            min-height: 180px;
+        }
+
+        /* El cursor amarillo parpadeante */
+        .cursor {
+            color: #fbbc04;
+            font-weight: bold;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        #tree-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* El tronco que crecerá */
+        #trunk {
+            position: absolute;
+            bottom: 0;
+            width: 8px;
+            height: 0; /* Inicia en 0 para la animación */
+            background: linear-gradient(to top, #4a3320, #6b4a31);
+            border-radius: 10px 10px 0 0;
+            transition: height 1.5s ease-in-out;
+        }
+
+        .flower {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            transform: scale(0) rotate(0deg); /* Inician invisibles */
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto de rebote (pop) */
+            margin-left: -17.5px;
+            margin-top: -17.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Girasol SVG insertado directamente */
+        .flower svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.1));
+        }
+
     </style>
 </head>
 <body>
 
-<div id="message">
-    <p id="text"></p>
-</div>
+    <div id="text-container">
+        <span id="text"></span><span class="cursor" id="cursor">_</span>
+    </div>
 
-<div id="tree-container">
-    <div class="trunk"></div>
-</div>
+    <div id="tree-container">
+        <div id="trunk"></div>
+    </div>
 
-<script>
-    const fullText = "Hola, Técnicamente si cuentan como flores ¿No? \n\nLas primeras que doy: \n\nA alguien que odio pero se las merece, pasa lindo día Elisa. \n\n— Te Aprecio mucho!";
-    let i = 0;
+    <script>
+        // El texto respetando los saltos de línea
+        const fullText = "Hola, Técnicamente si cuentan como flores ¿No?\n\nLas primeras que doy:\n\nA alguien que odio pero sigo amando,\npasa lindo día Hazel.\n\n— Te Aprecio mucho!";
+        
+        const textElement = document.getElementById('text');
+        const trunk = document.getElementById('trunk');
+        const treeContainer = document.getElementById('tree-container');
+        
+        let i = 0;
 
-    function typeWriter() {
-        if (i < fullText.length) {
-            document.getElementById("text").innerHTML += fullText.charAt(i) === '\n' ? '<br>' : fullText.charAt(i);
-            i++;
-            setTimeout(typeWriter, 50);
-        } else {
-            startFlowers();
+        // 1. Efecto de máquina de escribir
+        function typeWriter() {
+            if (i < fullText.length) {
+                let char = fullText.charAt(i);
+                if (char === '\n') {
+                    textElement.innerHTML += '<br>';
+                } else {
+                    textElement.innerHTML += char;
+                }
+                i++;
+                // Velocidad aleatoria para que parezca que alguien está tecleando
+                let speed = Math.random() * 40 + 30;
+                setTimeout(typeWriter, speed);
+            } else {
+                // Cuando termina de escribir, crece el árbol
+                setTimeout(growTree, 600);
+            }
         }
-    }
 
-    function startFlowers() {
-        const container = document.getElementById('tree-container');
-        for (let j = 0; j < 150; j++) {
-            setTimeout(() => {
-                const flower = document.createElement('div');
-                flower.className = 'flower';
-                // Generar forma de corazón/copa
-                const angle = Math.random() * Math.PI * 2;
-                const radius = Math.random() * 80;
-                const x = 150 + Math.cos(angle) * radius;
-                const y = 100 + Math.sin(angle) * radius;
-                
-                flower.style.left = x + 'px';
-                flower.style.top = y + 'px';
-                container.appendChild(flower);
-            }, j * 30);
+        // 2. Crecer el tronco
+        function growTree() {
+            trunk.style.height = '180px';
+            // Esperamos que el tronco termine para sacar las flores
+            setTimeout(spawnFlowers, 1500);
         }
-    }
 
-    window.onload = typeWriter;
-</script>
+        // 3. Crear el corazón de flores
+        function spawnFlowers() {
+            const numFlowers = 130; // Cantidad de flores
+            const centerX = treeContainer.offsetWidth / 2;
+            const centerY = treeContainer.offsetHeight - 180; // Donde termina el tronco
+
+            // SVG del girasol/margarita para que no sean solo puntos
+            const flowerSVG = `
+            <svg viewBox="0 0 100 100">
+                <path d="M50 15 C55 5, 75 5, 65 25 C85 15, 95 35, 75 45 C95 55, 85 75, 65 65 C75 85, 55 95, 50 80 C45 95, 25 85, 35 65 C15 75, 5 55, 25 45 C5 35, 15 15, 35 25 C25 5, 45 5, 50 15 Z" fill="#fbbc04" />
+                <circle cx="50" cy="50" r="14" fill="#6b4a31" />
+            </svg>`;
+
+            for (let j = 0; j < numFlowers; j++) {
+                setTimeout(() => {
+                    const flower = document.createElement('div');
+                    flower.className = 'flower';
+                    flower.innerHTML = flowerSVG;
+
+                    // FÓRMULA MATEMÁTICA DEL CORAZÓN PERFECTO
+                    const t = Math.random() * Math.PI * 2;
+                    const r = Math.sqrt(Math.random()); // Para rellenar el corazón por dentro
+                    
+                    // Escala del corazón
+                    const scale = 7 * r + 2; 
+                    
+                    // Ecuaciones paramétricas del corazón
+                    const x = 16 * Math.pow(Math.sin(t), 3);
+                    const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+                    flower.style.left = (centerX + (x * scale)) + 'px';
+                    // Subimos un poco el centro del corazón (-50px) para que encaje con el tronco
+                    flower.style.top = (centerY + (y * scale) - 50) + 'px';
+                    
+                    treeContainer.appendChild(flower);
+
+                    // Rotación aleatoria para que se vean orgánicas y activar la animación CSS
+                    requestAnimationFrame(() => {
+                        const rotation = Math.random() * 360;
+                        const size = Math.random() * 0.4 + 0.8; // Variación sutil de tamaño
+                        flower.style.transform = `scale(${size}) rotate(${rotation}deg)`;
+                    });
+
+                }, j * 35); // Velocidad con la que van apareciendo (35ms entre cada una)
+            }
+        }
+
+        // Arrancar la animación al cargar la página
+        window.onload = () => {
+            setTimeout(typeWriter, 500); // Pequeña pausa antes de empezar a escribir
+        };
+    </script>
 </body>
 </html>
